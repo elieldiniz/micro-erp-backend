@@ -1,0 +1,118 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Company {
+  id        String   @id @default(cuid())
+  nome      String
+  cnpj      String   @unique
+  email     String   @unique
+  senha     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  nome          String
+  descricao     String?
+  preco         Decimal  @db.Decimal(10, 2)
+  estoqueAtual  Int      @default(0)
+  estoqueMinimo Int      @default(0)
+  codigoBarras  String?  @unique
+  ncm           String?
+  cfop          String?
+  icms          Decimal? @db.Decimal(5, 2)
+  ipi           Decimal? @db.Decimal(5, 2)
+  pis           Decimal? @db.Decimal(5, 2)
+  cofins        Decimal? @db.Decimal(5, 2)
+  ativo         Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  stockMovements StockMovement[]
+  nfeItems       NfeItem[]
+
+  @@map("products")
+}
+
+model Client {
+  id              String   @id @default(cuid())
+  nome            String
+  cpfCnpj         String   @unique
+  tipoDocumento   String   // CPF ou CNPJ
+  email           String?
+  telefone        String?
+  inscricaoEstadual String?
+  endereco        Json     // {logradouro, numero, complemento, bairro, cep, cidade, uf}
+  ativo           Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  nfes Nfe[]
+
+  @@map("clients")
+}
+
+model StockMovement {
+  id          String   @id @default(cuid())
+  productId   String
+  tipo        String   // ENTRADA, SAIDA, AJUSTE
+  quantidade  Int
+  valorUnitario Decimal? @db.Decimal(10, 2)
+  observacao  String?
+  createdAt   DateTime @default(now())
+  createdBy   String?
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("stock_movements")
+}
+
+model Nfe {
+  id          String   @id @default(cuid())
+  clientId    String
+  numero      Int
+  serie       Int      @default(1)
+  chave       String?  @unique
+  status      String   // PENDENTE, AUTORIZADA, CANCELADA, REJEITADA
+  protocolo   String?
+  xml         String?
+  valorTotal  Decimal  @db.Decimal(10, 2)
+  dataEmissao DateTime @default(now())
+  observacao  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  client Client    @relation(fields: [clientId], references: [id])
+  items  NfeItem[]
+
+  @@map("nfes")
+}
+
+model NfeItem {
+  id            String  @id @default(cuid())
+  nfeId         String
+  productId     String
+  quantidade    Int
+  valorUnitario Decimal @db.Decimal(10, 2)
+  valorTotal    Decimal @db.Decimal(10, 2)
+  cfop          String?
+  ncm           String?
+  icms          Decimal? @db.Decimal(5, 2)
+  ipi           Decimal? @db.Decimal(5, 2)
+  pis           Decimal? @db.Decimal(5, 2)
+  cofins        Decimal? @db.Decimal(5, 2)
+
+  nfe     Nfe     @relation(fields: [nfeId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("nfe_items")
+}
