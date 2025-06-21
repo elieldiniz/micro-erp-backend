@@ -1,0 +1,252 @@
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb21wYW55SWQiOiJjbWMzdzh4ZXgwMDAwcXR1MTlyNDByYnh1IiwiZW1haWwiOiJlbXByYUB0ZTF0ZS5jb20iLCJub21lIjoiRW1wcmVzYSBUZXN0ZSIsImlhdCI6MTc1MDM2ODU5OSwiZXhwIjoxNzUwMzcyMTk5fQ.dIOut_Og_7AvgTRwfWM46oce1U7K3jwKYVbReYoFDsQ
+@clientId=cmc3wml2a0002qdjxw56yxdt8
+@productId=cmc4h1o810002cb7doryx7xsl
+@nfeId=cmc428wb6000211uygeiprrft
+### REGISTRO DE EMPRESA
+
+POST http://localhost:3000/api/company/register
+Content-Type: application/json
+
+{
+  "nome": "Empresa Teste",
+  "cnpj": "35.179.518/0001-19",
+  "email": "empra@te1te.com",
+  "senha": "123456"
+}
+
+###
+
+### LOGIN DE EMPRESA
+
+POST http://localhost:3000/api/company/login
+Content-Type: application/json
+
+{
+  "email": "empra@te1te.com",
+  "senha": "123456"
+}
+
+###
+
+############################################################
+# CLIENTES
+############################################################
+
+# Criar cliente
+POST http://localhost:3000/api/clients
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Cliente",
+  "cpfCnpj": "15691112864",
+  "email": "cliente.novo@te.com",
+  "telefone": "69999312266",
+  "endereco": {
+    "logradouro": "Rua Nova",
+    "numero": "789",
+    "bairro": "Centro",
+    "cep": "01234567",
+    "cidade": "São Paulo",
+    "uf": "SP"
+  }
+}
+
+###
+
+# Listar clientes
+GET http://localhost:3000/api/clients
+Authorization: Bearer {{token}}
+
+###
+
+# Buscar cliente por ID
+GET http://localhost:3000/api/clients/{{clientId}}
+Authorization: Bearer {{token}}
+
+###
+
+# Buscar cliente por CPF/CNPJ
+GET http://localhost:3000/api/clients/cpf-cnpj/39053344705
+Authorization: Bearer {{token}}
+
+###
+
+# Atualizar cliente
+PUT http://localhost:3000/api/clients/{{clientId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Cliente Atualizado"
+}
+
+###
+
+# Deletar cliente
+DELETE http://localhost:3000/api/clients/{{clientId}}
+Authorization: Bearer {{token}}
+
+############################################################
+# PRODUTOS
+############################################################
+
+# Criar produto
+POST http://localhost:3000/api/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "jato",
+  "codigoBarras": "78922345678",
+  "ncm": "1334567",
+  "cfop": "7102",
+  "preco": 50.00,
+  "estoqueAtual": 50
+}
+
+###
+
+# Listar produtos
+GET http://localhost:3000/api/products
+Authorization: Bearer {{token}}
+
+###
+
+# Buscar produto por ID
+GET http://localhost:3000/api/products/{{productId}}
+Authorization: Bearer {{token}}
+
+###
+
+# Atualizar produto
+PUT http://localhost:3000/api/products/{{productId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Produto Atualizado"
+}
+
+###
+
+# Deletar produto
+DELETE http://localhost:3000/api/products/{{productId}}
+Authorization: Bearer {{token}}
+
+###
+
+# Atualizar estoque do produto
+PATCH http://localhost:3000/api/products/{{productId}}/stock
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "quantidade": 12,
+  "tipo": "ENTRADA",
+  "observacao": "Reabastecimento"
+}
+
+############################################################
+# ESTOQUE
+############################################################
+
+# Criar movimentação de estoque
+POST http://localhost:3000/api/stock/movements
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "productId": "{{productId}}",
+  "tipo": "SAIDA",
+  "quantidade": 2,
+  "valorUnitario": 100.00,
+  "observacao": "Venda"
+}
+
+###
+
+# Listar movimentações de estoque
+GET http://localhost:3000/api/stock/movements
+Authorization: Bearer {{token}}
+
+###
+
+# Listar movimentações de um produto
+GET http://localhost:3000/api/stock/products/{{productId}}/movements
+Authorization: Bearer {{token}}
+
+###
+
+# Relatório de estoque
+GET http://localhost:3000/api/stock/report
+Authorization: Bearer {{token}}
+
+############################################################
+# NF-e
+############################################################
+
+# Criar NFe
+POST http://localhost:3000/api/nfe
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "clientId": "{{clientId}}",
+  "items": [
+    {
+      "productId": "{{productId}}",
+      "quantidade": 1,
+      "valorUnitario": 3.00
+    }
+  ],
+  "observacao": "Venda teste"
+}
+
+###
+
+# Listar NFes
+GET http://localhost:3000/api/nfe
+Authorization: Bearer {{token}}
+
+###
+
+# Buscar NFe por ID
+GET http://localhost:3000/api/nfe/{{nfeId}}
+Authorization: Bearer {{token}}
+
+###
+
+# Transmitir NFe
+POST http://localhost:3000/api/nfe/{{nfeId}}/transmitir
+Authorization: Bearer {{token}}
+
+###
+
+# Cancelar NFe
+POST http://localhost:3000/api/nfe/{{nfeId}}/cancelar
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "motivo": "Cancelamento de teste, NF-e emitida por engano"
+}
+
+###
+
+# Download do XML da NFe
+GET http://localhost:3000/api/nfe/{{nfeId}}/xml
+Authorization: Bearer {{token}}
+
+############################################################
+# HEALTH CHECK
+############################################################
+
+GET http://localhost:3000/api/health
+
+############################################################
+# DANFE
+GET http://localhost:3000/api/nfe/{{nfeId}}/danfe
+Authorization: Bearer {{token}}
+Accept: application/pdf############################################################
+# Download do PDF da DANFE

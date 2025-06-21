@@ -2,23 +2,8 @@
 import prisma from '../../config/database';
 import logger from '../../config/logger';
 import { validateCpfCnpj } from '../../middlewares/validation';
+import { CreateClientData } from './client.interface';
 
-export interface CreateClientData {
-  nome: string;
-  cpfCnpj: string;
-  email?: string;
-  telefone?: string;
-  inscricaoEstadual?: string;
-  endereco: {
-    logradouro: string;
-    numero: string;
-    complemento?: string;
-    bairro: string;
-    cep: string;
-    cidade: string;
-    uf: string;
-  };
-}
 
 export interface UpdateClientData extends Partial<CreateClientData> {}
 

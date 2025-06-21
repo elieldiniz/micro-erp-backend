@@ -1,178 +1,249 @@
-Claro! Aqui está uma documentação de uso completa para sua API de Micro ERP, cobrindo rotas, exemplos de payload, respostas esperadas, autenticação (se houver), dicas de uso e boas práticas.
-Você pode adaptar para um README, Wiki, ou até para Swagger/OpenAPI futuramente.
+# 📦 Micro ERP API
 
-📚 Micro ERP API – Documentação de Uso
-Sumário
-Introdução
-Autenticação
-Estrutura das Rotas
-Clientes
-Produtos
-Estoque
-NF-e
-Exemplos de Requisições
-Respostas de Erro
-Boas Práticas e Segurança
-FAQ
-Introdução
+Sistema de backend para um ERP leve e modular, voltado para microempresas. Permite o gerenciamento de clientes, produtos, estoque e emissão de Notas Fiscais Eletrônicas (NF-e).
 
-Esta API permite gerenciar clientes, produtos, estoque e emissão/transmissão de Notas Fiscais Eletrônicas (NF-e) para micro e pequenas empresas.
-Todas as rotas estão sob o prefixo /api.
+---
 
-Autenticação
+## 📑 Sumário
 
-Por padrão, esta API não exige autenticação.
-Para produção, recomenda-se implementar autenticação JWT ou OAuth2.
+* [📦 Micro ERP API](#-micro-erp-api)
+* [📑 Sumário](#-sumário)
+* [🚀 Instalação e Execução Local](#-instala%C3%A7%C3%A3o-e-execu%C3%A7%C3%A3o-local)
+* [🔐 Arquivo `.env`](#-arquivo-env)
+* [📡 Rotas da API](#-rotas-da-api)
+* [📦 Exemplos de Requisição e Resposta](#-exemplos-de-requisi%C3%A7%C3%A3o-e-resposta)
+* [📘 Modelos e Entidades](#-modelos-e-entidades)
+* [✅ Validações](#-valida%C3%A7%C3%B5es)
+* [🔄 Fluxos do Sistema](#-fluxos-do-sistema)
+* [❗ Erros Comuns](#-erros-comuns)
+* [🔐 Boas Práticas de Segurança](#-boas-pr%C3%A1ticas-de-seguran%C3%A7a)
+* [🧠 Tecnologias Utilizadas](#-tecnologias-utilizadas)
+* [🧾 Swagger (OpenAPI)](#-swagger-openapi)
+* [🤝 Contribuição](#-contribui%C3%A7%C3%A3o)
+* [📌 Dicas Finais](#-dicas-finais)
 
-Estrutura das Rotas
-Clientes
-Método	Rota	Descrição
-POST	/api/client	Criar cliente
-GET	/api/client	Listar clientes
-GET	/api/client/:id	Buscar cliente por ID
-GET	/api/client/cpfCnpj/:cpfCnpj	Buscar cliente por CPF/CNPJ
-PUT	/api/client/:id	Atualizar cliente
-DELETE	/api/client/:id	Deletar (desativar) cliente
-Produtos
-Método	Rota	Descrição
-POST	/api/product	Criar produto
-GET	/api/product	Listar produtos
-GET	/api/product/:id	Buscar produto por ID
-PUT	/api/product/:id	Atualizar produto
-DELETE	/api/product/:id	Deletar (desativar) produto
-POST	/api/product/:id/stock	Atualizar estoque do produto
-Estoque
-Método	Rota	Descrição
-POST	/api/stock	Criar movimentação de estoque
-GET	/api/stock	Listar movimentações
-GET	/api/stock/product/:productId	Movimentações de um produto
-GET	/api/stock/report	Relatório de estoque
-NF-e
-Método	Rota	Descrição
-POST	/api/nfe	Criar NFe
-GET	/api/nfe	Listar NFes
-GET	/api/nfe/:id	Buscar NFe por ID
-POST	/api/nfe/:id/transmitir	Transmitir NFe
-POST	/api/nfe/:id/cancelar	Cancelar NFe
-GET	/api/nfe/:id/xml	Download do XML da NFe
-Exemplos de Requisições
-Criar Cliente
-POST /api/client
-Content-Type: application/json
+---
 
-{
-  "nome": "Cliente Teste",
-  "cpfCnpj": "12345678901",
-  "email": "cliente@teste.com",
-  "telefone": "11999999999",
-  "endereco": {
-    "logradouro": "Rua Teste",
-    "numero": "123",
-    "bairro": "Centro",
-    "cep": "01234567",
-    "cidade": "São Paulo",
-    "uf": "SP"
-  }
-}
+## 🚀 Instalação e Execução Local
 
-Criar Produto
-POST /api/product
-Content-Type: application/json
+```bash
+git clone https://github.com/seuusuario/micro-erp-backend.git
+cd micro-erp-backend
+npm install
+cp .env.example .env
+npm run dev
+```
 
-{
-  "nome": "Produto Teste",
-  "codigoBarras": "7891234567890",
-  "ncm": "12345678",
-  "cfop": "5102",
-  "preco": 100.00,
-  "estoqueAtual": 10
-}
+---
 
-Criar Movimentação de Estoque
-POST /api/stock
-Content-Type: application/json
+## 🔐 Arquivo `.env`
 
-{
-  "productId": "id_do_produto",
-  "tipo": "SAIDA",
-  "quantidade": 2,
-  "valorUnitario": 100.00,
-  "observacao": "Venda"
-}
-
-Criar NFe
-POST /api/nfe
-Content-Type: application/json
-
-{
-  "clientId": "id_do_cliente",
-  "items": [
-    {
-      "productId": "id_do_produto",
-      "quantidade": 1,
-      "valorUnitario": 100.00
-    }
-  ],
-  "observacao": "Venda teste"
-}
-
-Transmitir NFe
-POST /api/nfe/{nfeId}/transmitir
-
-Cancelar NFe
-POST /api/nfe/{nfeId}/cancelar
-Content-Type: application/json
-
-{
-  "motivo": "Cancelamento de teste, NF-e emitida por engano"
-}
-
-Download do XML da NFe
-GET /api/nfe/{nfeId}/xml
-
-Respostas de Erro
-400 Bad Request: Payload inválido ou campos obrigatórios ausentes.
-404 Not Found: Recurso não encontrado (ID inválido, etc).
-500 Internal Server Error: Erro inesperado no servidor (veja logs para detalhes).
-
-Exemplo de erro:
-
-{
-  "success": false,
-  "message": "Cliente não encontrado"
-}
-
-Boas Práticas e Segurança
-Nunca envie certificados ou senhas pelo código ou repositório.
-Use variáveis de ambiente para dados sensíveis.
-Proteja a pasta certs/ com .gitignore e permissões restritas.
-Para produção, implemente autenticação JWT.
-Limite o rate de requisições (já implementado).
-Sempre valide os dados enviados pelo cliente.
-FAQ
-
-1. Preciso de certificado digital para emitir NF-e?
-Sim, o arquivo .pfx e a senha são obrigatórios e devem estar na pasta certs/ (ou caminho configurado).
-
-2. Como faço para testar a transmissão da NF-e?
-Use o endpoint /api/nfe/{nfeId}/transmitir após criar a NFe.
-
-3. Como faço para baixar o XML da NF-e?
-Use o endpoint /api/nfe/{nfeId}/xml.
-
-4. Como configuro o ambiente?
-Crie um arquivo .env com as variáveis necessárias (exemplo abaixo):
-
+```env
+PORT=3000
+DATABASE_URL=postgresql://user:password@localhost:5432/microerp
 NFE_CERTIFICADO_PATH=certs/certificado.pfx
 NFE_CERTIFICADO_SENHA=sua_senha
 NFE_CNPJ=12345678000195
 NFE_AMBIENTE=2
 NFE_UF=35
 NFE_CODIGO_MUNICIPIO=3550308
+```
 
-Observações Finais
-Todos os endpoints retornam JSON, exceto o download do XML.
-IDs devem ser substituídos pelos valores reais retornados nas criações.
-Para dúvidas ou problemas, consulte os logs do backend.
+---
 
-Se quiser um exemplo de arquivo .http para testar tudo no VSCode, ou um template Swagger/OpenAPI, só pedir!
+## 📡 Rotas da API
+
+### Clientes
+
+| Método | Rota                          | Descrição                   |
+| ------ | ----------------------------- | --------------------------- |
+| POST   | /api/client                   | Criar cliente               |
+| GET    | /api/client                   | Listar clientes             |
+| GET    | /api/client/\:id              | Buscar cliente por ID       |
+| GET    | /api/client/cpfCnpj/\:cpfCnpj | Buscar cliente por CPF/CNPJ |
+| PUT    | /api/client/\:id              | Atualizar cliente           |
+| DELETE | /api/client/\:id              | Deletar (desativar) cliente |
+
+### Produtos
+
+| Método | Rota                    | Descrição             |
+| ------ | ----------------------- | --------------------- |
+| POST   | /api/product            | Criar produto         |
+| GET    | /api/product            | Listar produtos       |
+| GET    | /api/product/\:id       | Buscar produto por ID |
+| PUT    | /api/product/\:id       | Atualizar produto     |
+| DELETE | /api/product/\:id       | Desativar produto     |
+| PATCH  | /api/product/\:id/stock | Atualizar estoque     |
+
+### NF-e
+
+| Método | Rota                     | Descrição          |
+| ------ | ------------------------ | ------------------ |
+| POST   | /api/nfe                 | Criar NF-e         |
+| GET    | /api/nfe                 | Listar NF-es       |
+| GET    | /api/nfe/\:id            | Buscar NF-e por ID |
+| POST   | /api/nfe/\:id/transmitir | Transmitir NF-e    |
+| POST   | /api/nfe/\:id/cancelar   | Cancelar NF-e      |
+| GET    | /api/nfe/\:id/xml        | Baixar XML         |
+
+---
+
+## 📦 Exemplos de Requisição e Resposta
+
+### Criar Produto
+
+```json
+POST /api/product
+{
+  "nome": "Produto X",
+  "preco": 99.90,
+  "estoqueAtual": 10
+}
+```
+
+### Atualizar Estoque
+
+```json
+PATCH /api/product/abc123/stock
+{
+  "quantidade": 5,
+  "tipo": "ENTRADA",
+  "observacao": "Reabastecimento"
+}
+```
+
+---
+
+## 📘 Modelos e Entidades
+
+### Produto
+
+```ts
+{
+  id: string;
+  nome: string;
+  descricao?: string;
+  preco: number;
+  estoqueAtual: number;
+  estoqueMinimo?: number;
+  codigoBarras?: string;
+  ativo: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### Cliente
+
+```ts
+{
+  id: string;
+  nome: string;
+  cpfCnpj: string;
+  email?: string;
+  telefone?: string;
+  endereco: {
+    logradouro: string;
+    numero: string;
+    bairro: string;
+    cidade: string;
+    uf: string;
+    cep: string;
+  };
+}
+```
+
+---
+
+## ✅ Validações
+
+* `preco` deve ser um número positivo.
+* `estoqueAtual` não pode ser negativo.
+* `cpfCnpj` é validado por formato.
+* `tipo` de movimentação deve ser: `ENTRADA`, `SAIDA` ou `AJUSTE`.
+
+---
+
+## 🔄 Fluxos do Sistema
+
+### Criação de Produto
+
+1. POST /api/product
+2. Produto é salvo com estoque atual
+
+### Atualização de Estoque
+
+1. PATCH /api/product/\:id/stock
+2. Registro salvo na tabela `stockMovement`
+
+### Emissão de NF-e
+
+1. POST /api/nfe (cliente + produtos)
+2. POST /api/nfe/\:id/transmitir
+3. GET /api/nfe/\:id/xml para baixar XML
+
+---
+
+## ❗ Erros Comuns
+
+| Status | Mensagem                  |
+| ------ | ------------------------- |
+| 400    | Campo inválido ou ausente |
+| 404    | Recurso não encontrado    |
+| 500    | Erro interno do servidor  |
+
+---
+
+## 🔐 Boas Práticas de Segurança
+
+* Nunca expor certificados ou senhas no repositório.
+* Adicione certs/ ao `.gitignore`.
+* Use autenticação JWT em produção.
+* Valide toda entrada com Joi.
+
+---
+
+## 🧠 Tecnologias Utilizadas
+
+* Node.js + Express
+* Prisma ORM + PostgreSQL
+* Joi para validação
+* dotenv para variáveis de ambiente
+* Lucide, ShadCN para frontend (se aplicável)
+
+---
+
+## 🧾 Swagger (OpenAPI)
+
+Para documentação interativa, instale:
+
+```bash
+npm install swagger-ui-express
+```
+
+E adicione:
+
+```ts
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './swagger.json';
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+```
+
+---
+
+## 🤝 Contribuição
+
+1. Fork o repositório
+2. Crie uma branch (`git checkout -b feature/nome`)
+3. Commit (`git commit -am 'Add nova feature'`)
+4. Push (`git push origin feature/nome`)
+5. Crie um Pull Request
+
+---
+
+## 📌 Dicas Finais
+
+* Sempre rode os testes antes de subir alterações
+* Padronize commits com Conventional Commits
+* Use migrations com Prisma para controlar schema
+* Atualize a documentação sempre que criar uma nova rota

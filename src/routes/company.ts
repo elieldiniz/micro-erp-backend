@@ -1,8 +1,7 @@
-// src/routes/company.ts
-import { Router } from 'express';
+import express from 'express';
 import { registerCompany, loginCompany } from '../modules/company/company.controller';
 
-const router = Router();
+const router = express.Router();
 
 router.post('/register', registerCompany);
 router.post('/login', loginCompany);

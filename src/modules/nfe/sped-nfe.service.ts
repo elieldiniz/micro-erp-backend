@@ -10,13 +10,13 @@ const tools = new Tools({
   tpAmb: nfeConfig.ambiente,
   UF: nfeConfig.uf,
   versao: '4.00',
-  xmllint: '', // ou o caminho do xmllint se precisar, senão string vazia
-  openssl: null, // aqui deve ser null, não string vazia!
+  xmllint: '',
+  openssl: null,
   timeout: 60,
-  CSC: '',     // NFC-e apenas, pode deixar vazio
-  CSCid: '',   // NFC-e apenas, pode deixar vazio
-  CPF: '',     // Não usado para NF-e, pode deixar vazio
-  CNPJ: nfeConfig.empresa.cnpj, // CNPJ do emitente
+  CSC: '',     
+  CSCid: '',   
+  CPF: '',     
+  CNPJ: nfeConfig.empresa.cnpj, 
 }, {
   pfx: path.join(process.cwd(), 'certs', 'certificado.pfx'),
   senha: senhaCert,
@@ -24,6 +24,7 @@ const tools = new Tools({
 
 export class SpedNfeService {
   static gerarXmlNfe(nfe: any): string {
+    console.log("[gerarXmlNfe] Iniciando geração do XML...");
     const make = new Make();
 
     make.tagInfNFe({ Id: null, versao: '4.00' });
@@ -133,14 +134,32 @@ export class SpedNfeService {
       fone: "1140000000"
     });
 
-    return make.xml();
+    const xmlGerado = make.xml();
+
+    return xmlGerado;
   }
 
   static async assinarXml(xml: string): Promise<string> {
-    return await tools.xmlSign(xml);
+
+    try {
+      const xmlAssinado = await tools.xmlSign(xml);
+
+      return xmlAssinado;
+    } catch (error) {
+
+      throw error;
+    }
   }
 
   static async transmitirXml(xmlAssinado: string): Promise<any> {
-    return await tools.sefazEnviaLote(xmlAssinado, { indSinc: 1 });
+
+    try {
+      const retorno = await tools.sefazEnviaLote(xmlAssinado, { indSinc: 1 });
+
+      return retorno;
+    } catch (error) {
+
+      throw error;
+    }
   }
 }

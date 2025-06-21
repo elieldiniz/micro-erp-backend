@@ -1,7 +1,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { ClientService } from './client.service';
-import logger from '../../config/logger';
+
 
 const clientService = new ClientService();
 

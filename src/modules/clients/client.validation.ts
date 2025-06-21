@@ -1,4 +1,3 @@
-
 import Joi from 'joi';
 
 export const createClientSchema = Joi.object({

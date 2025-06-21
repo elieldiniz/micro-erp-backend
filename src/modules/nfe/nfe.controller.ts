@@ -1,9 +1,10 @@
-
 import { Request, Response, NextFunction } from 'express';
 import { NfeService } from './nfe.service';
-import logger from '../../config/logger';
+import { NfeRepository } from './nfe.repository';
 
-const nfeService = new NfeService();
+
+const nfeRepository = new NfeRepository();
+const nfeService = new NfeService(nfeRepository);
 
 export class NfeController {
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -12,7 +13,7 @@ export class NfeController {
       res.status(201).json({
         success: true,
         data: nfe,
-        message: 'NFe criada com sucesso'
+        message: 'NFe criada com sucesso',
       });
     } catch (error) {
       next(error);
@@ -23,14 +24,14 @@ export class NfeController {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
-      const status = req.query.status as string;
+      const status = req.query.status as string | undefined;
 
       const result = await nfeService.findAll(page, limit, status);
-      
+
       res.json({
         success: true,
         data: result.nfes,
-        pagination: result.pagination
+        pagination: result.pagination,
       });
     } catch (error) {
       next(error);
@@ -42,7 +43,7 @@ export class NfeController {
       const nfe = await nfeService.findById(req.params.id);
       res.json({
         success: true,
-        data: nfe
+        data: nfe,
       });
     } catch (error) {
       next(error);
@@ -55,7 +56,7 @@ export class NfeController {
       res.json({
         success: true,
         data: nfe,
-        message: 'NFe transmitida com sucesso'
+        message: 'NFe transmitida com sucesso',
       });
     } catch (error) {
       next(error);
@@ -69,28 +70,20 @@ export class NfeController {
       res.json({
         success: true,
         data: nfe,
-        message: 'NFe cancelada com sucesso'
+        message: 'NFe cancelada com sucesso',
       });
     } catch (error) {
       next(error);
     }
   }
 
-  async downloadXml(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async downloadDanfe(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const nfe = await nfeService.findById(req.params.id);
-      
-      if (!nfe.xml) {
-        res.status(404).json({
-          success: false,
-          message: 'XML não disponível para esta NFe'
-        });
-        return;
-      }
+      const pdfBuffer = await nfeService.gerarDanfePdfBufferViaMeuDanfe(req.params.id);
 
-      res.setHeader('Content-Type', 'application/xml');
-      res.setHeader('Content-Disposition', `attachment; filename="NFe_${nfe.numero}.xml"`);
-      res.send(nfe.xml);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="DANFE_${req.params.id}.pdf"`);
+      res.send(pdfBuffer);
     } catch (error) {
       next(error);
     }

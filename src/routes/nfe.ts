@@ -1,17 +1,14 @@
-
 import { Router } from 'express';
 import { NfeController } from '../modules/nfe/nfe.controller';
-import { validateSchema } from '../middlewares/validation';
-import { createNfeSchema, cancelarNfeSchema } from '../modules/nfe/nfe.validation';
 
 const router = Router();
 const nfeController = new NfeController();
 
-router.post('/', validateSchema(createNfeSchema), nfeController.create.bind(nfeController));
-router.get('/', nfeController.findAll.bind(nfeController));
-router.get('/:id', nfeController.findById.bind(nfeController));
-router.post('/:id/transmitir', nfeController.transmitir.bind(nfeController));
-router.post('/:id/cancelar', validateSchema(cancelarNfeSchema), nfeController.cancelar.bind(nfeController));
-router.get('/:id/xml', nfeController.downloadXml.bind(nfeController));
+router.post('/', (req, res, next) => nfeController.create(req, res, next));
+router.get('/', (req, res, next) => nfeController.findAll(req, res, next));
+router.get('/:id', (req, res, next) => nfeController.findById(req, res, next));
+router.post('/:id/transmitir', (req, res, next) => nfeController.transmitir(req, res, next));
+router.post('/:id/cancelar', (req, res, next) => nfeController.cancelar(req, res, next));
+router.get('/:id/danfe', (req, res, next) => nfeController.downloadDanfe(req, res, next));
 
 export default router;

@@ -1,18 +1,16 @@
-
 import { Request, Response, NextFunction } from 'express';
 import { ProductService } from './product.service';
-import logger from '../../config/logger';
-
-const productService = new ProductService();
 
 export class ProductController {
+  constructor(private productService: ProductService) {}
+
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const product = await productService.create(req.body);
+      const product = await this.productService.create(req.body);
       res.status(201).json({
         success: true,
         data: product,
-        message: 'Produto criado com sucesso'
+        message: 'Produto criado com sucesso',
       });
     } catch (error) {
       next(error);
@@ -23,14 +21,14 @@ export class ProductController {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
-      const search = req.query.search as string;
+      const search = req.query.search as string | undefined;
 
-      const result = await productService.findAll(page, limit, search);
-      
+      const result = await this.productService.findAll(page, limit, search);
+
       res.json({
         success: true,
         data: result.products,
-        pagination: result.pagination
+        pagination: result.pagination,
       });
     } catch (error) {
       next(error);
@@ -39,10 +37,14 @@ export class ProductController {
 
   async findById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const product = await productService.findById(req.params.id);
+      const product = await this.productService.findById(req.params.id);
+      if (!product) {
+        res.status(404).json({ success: false, message: 'Produto não encontrado' });
+        return;
+      }
       res.json({
         success: true,
-        data: product
+        data: product,
       });
     } catch (error) {
       next(error);
@@ -51,11 +53,11 @@ export class ProductController {
 
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const product = await productService.update(req.params.id, req.body);
+      const product = await this.productService.update(req.params.id, req.body);
       res.json({
         success: true,
         data: product,
-        message: 'Produto atualizado com sucesso'
+        message: 'Produto atualizado com sucesso',
       });
     } catch (error) {
       next(error);
@@ -64,10 +66,10 @@ export class ProductController {
 
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      await productService.delete(req.params.id);
+      await this.productService.delete(req.params.id);
       res.json({
         success: true,
-        message: 'Produto desativado com sucesso'
+        message: 'Produto desativado com sucesso',
       });
     } catch (error) {
       next(error);
@@ -77,12 +79,12 @@ export class ProductController {
   async updateStock(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { quantidade, tipo, observacao } = req.body;
-      const product = await productService.updateStock(req.params.id, quantidade, tipo, observacao);
-      
+      const product = await this.productService.updateStock(req.params.id, quantidade, tipo, observacao);
+
       res.json({
         success: true,
         data: product,
-        message: 'Estoque atualizado com sucesso'
+        message: 'Estoque atualizado com sucesso',
       });
     } catch (error) {
       next(error);
